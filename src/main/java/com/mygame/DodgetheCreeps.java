@@ -22,9 +22,10 @@ import com.simsilica.lemur.style.ElementId;
 import jMe3GL2.physics.Dyn4jAppState;
 import jMe3GL2.physics.PhysicsSpace;
 import jMe3GL2.physics.ThreadingType;
-import jMe3GL2.physics.control.AbstractBody;
+import jMe3GL2.physics.control.PhysicsBody2D;
 import jMe3GL2.renderer.Camera2DState;
 import jMe3GL2.util.Timer;
+import jMe3GL2.util.TimerAppState;
 import jMe3GL2.util.TimerTask;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -58,8 +59,9 @@ public final class DodgetheCreeps extends SimpleApplication {
         app.start();
     }
     
-    private Dyn4jAppState<AbstractBody> dyn4jAppState;
-    private PhysicsSpace<AbstractBody> physicsSpace;
+    private Dyn4jAppState<PhysicsBody2D> dyn4jAppState;
+    private PhysicsSpace<PhysicsBody2D> physicsSpace;
+    private TimerAppState timerAppState;
     private Camera2DState camera2DState;
     
     private Player player;
@@ -92,15 +94,25 @@ public final class DodgetheCreeps extends SimpleApplication {
         camera2DState = new Camera2DState(5f, 0.01f);
         stateManager.attach(camera2DState);
         
+        timerAppState = new TimerAppState();
+        stateManager.attach(timerAppState);
+        
         physicsSpace = dyn4jAppState.getPhysicsSpace();
         
         mobPath = new MobPath();
         mobPath.setGScreen(cam);
         
-        mobTimer.addTask(_on_MobTimer_timeout);
-        scoreTimer.addTask(_on_ScoreTimer_timeout);
-        startTimer.addTask(_on_StartTimer_timeou);
-        messageTimer.addTask(_on_MessageTimer_timeout);
+        timerAppState.attachTimer("MobTimer", mobTimer, 0.60f)
+                     .addTask(_on_MobTimer_timeout);
+        
+        timerAppState.attachTimer("ScoreTimer", scoreTimer, 0.60f)
+                     .addTask(_on_ScoreTimer_timeout);
+        
+        timerAppState.attachTimer("StartTimer", startTimer, 0.60f)
+                     .addTask(_on_StartTimer_timeou);
+        
+        timerAppState.attachTimer("MessageTimer", messageTimer, 0.60f)
+                     .addTask(_on_MessageTimer_timeout);
         
         music = new AudioNode(assetManager.loadAudio("Sounds/House_In_a_Forest_Loop.ogg"), new AudioKey("Music", true));
         music.setPositional(false);
@@ -115,14 +127,14 @@ public final class DodgetheCreeps extends SimpleApplication {
         player = Player.newInstancePlayer(assetManager, cam);
         
         setupInputMap(player);
-        World<AbstractBody> world = physicsSpace.getPhysicsWorld();
+        World<PhysicsBody2D> world = physicsSpace.getPhysicsWorld();
         world.setGravity(0, 0);
         
         world.addStepListener(new StepListenerAdapter<>() {
             @Override
-            public void begin(TimeStep step, PhysicsWorld<AbstractBody, ?> world) {
-                List<ContactConstraint<AbstractBody>> contacts = world.getContacts(player);
-                for (final ContactConstraint<AbstractBody> cc : contacts) {
+            public void begin(TimeStep step, PhysicsWorld<PhysicsBody2D, ?> world) {
+                List<ContactConstraint<PhysicsBody2D>> contacts = world.getContacts(player);
+                for (final ContactConstraint<PhysicsBody2D> cc : contacts) {
                     if (isMob(cc.getOtherBody(player))) {                        
                         gameOver();
                     }
@@ -133,7 +145,7 @@ public final class DodgetheCreeps extends SimpleApplication {
         headsUpDisplay();
     }
     
-    private boolean isMob(AbstractBody body) {
+    private boolean isMob(PhysicsBody2D body) {
 	Object userData = body.getUserData();
         if (userData != null 
                 && (userData instanceof Spatial)) {
@@ -277,14 +289,6 @@ public final class DodgetheCreeps extends SimpleApplication {
         scoreTimer.stop();
     }
     
-    @Override
-    public void simpleUpdate(float tpf) {
-        mobTimer.update(tpf, 0.60f);
-        scoreTimer.update(tpf, 0.60f);
-        startTimer.update(tpf, 0.60f);
-        messageTimer.update(tpf, 0.60f);
-    }
-
     @Override
     public void simpleRender(RenderManager rm) {
         if (game_over) {

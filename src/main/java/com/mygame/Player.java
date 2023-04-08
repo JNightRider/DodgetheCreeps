@@ -9,7 +9,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
 import jMe3GL2.geometry.jMe3GL2Geometry;
-import jMe3GL2.physics.control.RigidBody2D;
+import jMe3GL2.physics.control.KinematicBody2D;
 import jMe3GL2.scene.control.AnimatedSprite;
 import jMe3GL2.scene.shape.Sprite;
 import jMe3GL2.util.Converter;
@@ -19,7 +19,7 @@ import org.dyn4j.geometry.Interval;
 import org.dyn4j.geometry.MassType;
 import org.dyn4j.geometry.Vector2;
 
-public class Player extends RigidBody2D implements ActionListener {
+public class Player extends KinematicBody2D implements ActionListener {
     
     public static final String MOVE_RIGHT = "move_right";
     public static final String MOVE_LEFT  = "move_left";
@@ -104,12 +104,7 @@ public class Player extends RigidBody2D implements ActionListener {
             dead = false;
             spatial.removeFromParent();
             physicsSpace.removeBody(this);
-        }
-        
-        setAngularVelocity(0);
-        setLinearVelocity(0, 0);
-        getTransform().setRotation(0);
-        
+        }        
         super.controlUpdate(tpf);        
         Vector2 velocity = new Vector2(0, 0);
         if ( right ) {

@@ -46,7 +46,7 @@ dependencies {
 
     implementation 'org.dyn4j:dyn4j:' + dyn4jVer
 
-    implementation name: 'jMe3GL2-1.0-SNAPSHOT'
+    implementation name: 'jMe3GL2-core-1.2-SNAPSHOT'
     implementation name: 'dynamic-hud-v1.0.0'
 }
 
