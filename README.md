@@ -3,4 +3,3 @@
 Libraries used:
 * [dyn4j](https://dyn4j.org/)
 * [jMe3GL2](https://github.com/JNightRide/jMe3GL2)
-* [monkey-lemur](https://github.com/JNightRide/monkey-lemur)
